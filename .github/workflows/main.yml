@@ -17,14 +17,14 @@ jobs:
         uses: php-actions/composer@v6
 
       - name: Run PHPUnit
-        uses: php-actions/phpunit@v4 
+        uses: php-actions/phpunit@v4  
         with:
           version: 9.6
           bootstrap: vendor/autoload.php
           configuration: phpunit.xml
           args: --coverage-text
 
-          
+
   deploy:
     runs-on: ubuntu-latest
     needs: phpunit
