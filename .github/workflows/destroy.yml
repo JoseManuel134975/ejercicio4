@@ -1,0 +1,47 @@
+name: Destroying a terraform state
+
+on:
+  workflow_dispatch:
+    inputs:
+      job:
+        description: 'Choose a job'
+        required: true
+        type: choice
+        options:
+          - destroy
+
+jobs:
+  destroy:
+    if: ${{ github.event.inputs.job == 'destroy' }}
+    runs-on: ubuntu-latest
+      
+    env:
+      aws_region: us-east-1
+      aws_access_key_id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      aws_secret_access_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      aws_session_token: ${{ secrets.AWS_SESSION_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.aws_region }}
+          aws-access-key-id: ${{ env.aws_access_key_id }}
+          aws-secret-access-key: ${{ env.aws_secret_access_key }}
+          aws-session-token: ${{ env.aws_session_token }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Descargar estado de Terraform
+        run: aws s3 cp s3://josemanueldaw/terraform.tfstate terraform/terraform.tfstate
+
+      - name: Destroying terraform state
+        working-directory: ./terraform
+        run: | 
+          terraform init
+          terraform destroy -auto-approve
+          
